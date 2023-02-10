@@ -2,7 +2,7 @@ package entity
 
 import (
 	"time"
-
+	//"github.com/asaskevich/govalidator"
 	"gorm.io/gorm"
 )
 
@@ -10,7 +10,7 @@ type Nurse struct {
 	gorm.Model
 	FirstName            string
 	LastName             string
-	Email                string
+	Email                string `gorm:"uniqueIndex"`
 	Password             string
 	IdentificationNumber string
 	BirthDay             time.Time
@@ -18,6 +18,7 @@ type Nurse struct {
 	Address              string
 	Salary               uint16
 
+	// 1 Nurse สามารถลงบันทึกได้หลาย HistorySheet
 	HistorySheets []HistorySheet `gorm:"foreignKey:NurseID"`
 }
 
@@ -35,10 +36,12 @@ type HistorySheet struct {
 	DrugAllergySymtom      string
 	PatientSymtom          string
 
+	// 1 HistorySheet สามารถมีการประเมินได้หลายครั้ง (OutpatientScreening)
 	OutpatientScreenings []OutpatientScreening `gorm:"foreignKey:HistorySheetID"`
 
+	// NurseID คือ Foreign Key ที่อ้างอิงไปยัง Nurse
 	NurseID *uint
-	Nurse   Nurse `gorm:"references:ID"`
+	Nurse   Nurse `references:"ID"`
 }
 
 // EmergencyLevel
@@ -47,6 +50,7 @@ type EmergencyLevel struct {
 
 	Level           string
 	AssessmentForms string
+	procedure       string
 
 	OutpatientScreenings []OutpatientScreening `gorm:"foreignKey:EmergencyLevelID"`
 }
@@ -62,16 +66,18 @@ type HighBloodPressureLevel struct {
 type DiabetesLevel struct {
 	gorm.Model
 
-	Level           string
-	AssessmentForms string
+	Level             string
+	AssessmentForms   string
+	HistoryTakingForm string
 
 	OutpatientScreenings []OutpatientScreening `gorm:"foreignKey:DiabetesLevelID"`
 }
 type ObesityLevel struct {
 	gorm.Model
 
-	Level           string
-	AssessmentForms string
+	Level             string
+	AssessmentForms   string
+	HistoryTakingForm string
 
 	OutpatientScreenings []OutpatientScreening `gorm:"foreignKey:ObesityLevelID"`
 }

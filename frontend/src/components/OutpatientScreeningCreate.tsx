@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-//import Box from '@mui/material/Box';
+import { Link as RouterLink, useParams } from "react-router-dom";
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import FormControl from '@mui/material/FormControl';
@@ -8,7 +8,6 @@ import Paper from '@mui/material/Paper';
 import Grid from '@mui/material/Grid';
 import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
-import Select, { SelectChangeEvent } from "@mui/material/Select";
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -24,11 +23,14 @@ import MuiAlert, { AlertProps } from "@mui/material/Alert";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
-import { HistorySheetsInterface } from "../models/IHistorySheet";
+
+import { NurseInterface } from "../models/INurse";
+import { HistorySheetInterface } from "../models/IHistorySheet";
+import { EmergencyLevelInterface } from "../models/IEmergencyLevel";
 import { HighBloodPressureLevelsInterface } from "../models/IHighBloodPressureLevel";
-import { DiabetesLevelsInterface } from "../models/IDiabetesLevel";
-//import { FoodOrderedFoodSetsInterface, FoodOrderedsInterface } from "../models/OutpatientScreening";
-import { OutpatientScreeningsInterface } from "../models/OutpatientScreening";
+import { DiabetesLevelInterface } from "../models/IDiabetesLevel";
+import { ObesityLevelInterface } from "../models/IObesityLevel";
+import { OutpatientScreeningsInterface } from "../models/IOutpatientScreening";
 
 
 const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
@@ -38,25 +40,18 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
   return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
 });
 
-/* UI ของระบบการสั่งอาหารว่าง
-    ตัวแปรสำหรับรับค่า Interface Ex. const [historySheets, sethistorySheets] = React.useState<historySheetsInterface[]>([]);
-    เป็น array เพราะเป็นข้อมูลหลายตัว 
-    ([]); => ตัวนี้หมายถึงค่าเริ่มต้นของตัวแปร (เรากำหนดให้เป็น array ว่างเปล่าไปก่อน)
-    ###################################################################################################
-    ใช้คำว่า export นำหน้าเพราะว่าเราจะเอาไปใช้ในไฟล์อื่นต่อ (ไฟล์ App.tsx)
-    ส่วน default หมายความว่าเราสามารถเอาชื่อฟังก์ชันนี้ไปใช้ได้เลย (หมายถึงจะได้รู้ว่าฟังก์ชันนี้ ตัว default มันอยู่หน้าไหนอะ)
-*/
+export default function OutpatienScreeningsCreate() {
+  // ดึง HistorySheetId มาจาก url ตอนกดเลือกใบการซักประวัติ ex. "localhost:3000/OutpatienScreeningCreate/2" จะได้ HistorySheetId = 2
+  const { HistorySheetId } = useParams();
 
-export default function FoodOrderedCreate() {
-  //Set Function
-  // const [historySheets, sethistorySheets] = React.useState<historySheetsInterface[]>([]);
-  const [historySheet, setHistorySheet] = React.useState<HistorySheetsInterface>();
-  const [foodPaymenyTypes, setFoodPaymentTypes] = React.useState<FoodPaymentTypesInterface[]>([]);
-  const [foodSets, setFoodSets] = React.useState<FoodSetsInterface[]>([]);
-  const [selectedFoodSet, setSelectedFoodSet] = React.useState<FoodSetsInterface | null>();
-  const [selectedHistorySheet, setSelectedHistorySheet] = React.useState<HistorySheetsInterface[]>([]);
-  const [foodOrdered, setFoodOrdered] = React.useState<Partial<FoodOrderedsInterface>>({
-    HistorySheetID: 1, FoodPaymentTypeID: 0, FoodOrderedFoodSets: [], FoodTime: new Date(),  TotalPrice: 0          // แก้ตอนรวม
+  const [HistorySheet, setHistorySheet] = React.useState<HistorySheetInterface>();
+  const [EmergencyLevel, setEmergencyLevel] = React.useState<EmergencyLevelInterface | null>();
+  const [HighBloodPressureLevels, setHighBloodPressureLevels] = React.useState<HighBloodPressureLevelsInterface>();
+  const [DiabetesLevel, setDiabetesLevel] = React.useState<DiabetesLevelInterface>();
+  const [ObesityLevel, setObesityLevel] = React.useState<ObesityLevelInterface>();
+  
+  const [OutpatienScreenings, setOutpatienScreenings] = React.useState<Partial<OutpatientScreeningsInterface>>({
+    HistorySheetID: Number(HistorySheetId), EmergencyLevelID: Number(EmergencyLevel),HighBloodPressureLevelID: Number(HighBloodPressureLevels),DiabetesLevelID: Number(DiabetesLevel),ObesityLevelID: Number(ObesityLevel), Time: new Date()       
   });
 
   const [success, setSuccess] = React.useState(false);
@@ -74,51 +69,28 @@ export default function FoodOrderedCreate() {
   };
 
   //Get Function
-  const getHistorySheets = async () => {
-    const apiUrl = "http://localhost:8080/historySheet/1";       //Port Backend (path get historySheets) ***แก้ตอนรวมไฟล์
+  const getHistorySheet = async () => {
+    const apiUrl = `http://localhost:8080/HistorySheet/${HistorySheetId}`;       
     const requestOptions = {
-      method: "GET",                                       //วิธีการที่ทำ
+      method: "GET",                                       
       headers: {
-        "Content-Type": "application/json",                //ติดต่อสื่อสารกันโดยใช้ json (ถ้าไม่ใช้ json ก็อาจจจะเป็น HTML, Text, Pics ไรงี้)
+        "Content-Type": "application/json",                
         Authorization: `Bearer ${localStorage.getItem("token")}`
       }
     }
 
-    fetch(apiUrl, requestOptions)                          //เรียกใช้ฟังก์ชัน fetch ในการดึงข้อมูล (input เป็น apiUrl,RequestInfo เป็น requestOptions)
-      .then(response => response.json())                   //พอหลังบ้าน respon กลับมาเราก็จะทำการ then ข้อมูลที่ได้จากหลังบ้าน โดยเริ่มจากการแปลงข้อมูลให้เป็น json 
+    fetch(apiUrl, requestOptions)                          
+      .then(response => response.json())                   
       .then(res => {
-        console.log(res);                                  //console log ดูว่าข้อมูลที่ได้จากหลังบ้านเป็นหน้าตายังไง
-        if (res.data) {                                    //มันติดต่อกันผ่าน path /bookins ใช่ป้ะ มันก็เลยจะวิ่งไปที่ controller historySheet (List)ใน Backend อะ
-          setHistorySheet(res.data);                           //โดยตัว respone ที่เราได้จาก backend มันก็จะมี data กับ error ซึ่งถ้ามันมี data ส่งมาอะมันก็จะ
-        } else {                                           //มันก็จะเอาค่าไปเก็บไว้ใน sethistorySheets (Set function ที่เรากำหนดไว้ก่อนหน้านี้อะ)
+        console.log(res);                                  
+        if (res.data) {                                    
+          setHistorySheet(res.data);                           
+        } else {                                           
           console.log(res.error);
         }
       })
   }
-
-  const getFoodSets = async () => {                       //Get ตามหน้า UI อะ ไล่ไปเรื่อย
-    const apiUrl = "http://localhost:8080/foodsets";
-    const requestOptions = {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("token")}`
-      }
-    }
-
-    fetch(apiUrl, requestOptions)
-      .then(response => response.json())
-      .then(res => {
-        console.log(res);
-        if (res.data) {
-          setFoodSets(res.data);
-        } else {
-          console.log(res.error);
-        }
-      })
-  }
-
-  const getFoodPaymentTypes = async () => {
+  const getEmergencyLevel = async () => {
     const apiUrl = "http://localhost:8080/foodpayment_types";
     const requestOptions = {
       method: "GET",
@@ -133,30 +105,21 @@ export default function FoodOrderedCreate() {
       .then(res => {
         console.log(res);
         if (res.data) {
-          setFoodPaymentTypes(res.data);
+          setEmergencyLevel(res.data);
         } else {
           console.log(res.error);
         }
       })
   }
 
-  const submit = () => {
-
-    if (foodOrdered.FoodOrderedFoodSets?.length === 0) {
-      setError(true);
-      return;
-    }
-    console.log(foodOrdered);
-
-    // return
-    const apiUrl = "http://localhost:8080/foodordereds";
+  const getHighBloodPressureLevels = async () => {                       
+    const apiUrl = "http://localhost:8080/HighBloodPressureLevels";
     const requestOptions = {
-      method: "POST",
+      method: "GET",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${localStorage.getItem("token")}`
-      },
-      body: JSON.stringify(foodOrdered)
+      }
     }
 
     fetch(apiUrl, requestOptions)
@@ -164,317 +127,222 @@ export default function FoodOrderedCreate() {
       .then(res => {
         console.log(res);
         if (res.data) {
-          setSuccess(true)
+          setHighBloodPressureLevels(res.data);
         } else {
-          setError(true);
-          console.log(res.error)
+          console.log(res.error);
         }
       })
   }
+  const getDiabetesLevel = async () => {                       
+    const apiUrl = "http://localhost:8080/DiabetesLevel";
+    const requestOptions = {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("token")}`
+      }
+    }
 
-  const addToOrder = () => {
-    if (!selectedFoodSet) {
-      return;
-    }
-    let newFoodSet: Partial<FoodOrderedFoodSetsInterface> = {
-      FoodSetID: selectedFoodSet.ID,
-      Quantity: 1
-    }
-    let newOrdered = { ...foodOrdered };
-    let newPrice = (foodOrdered.TotalPrice ?? 0) + (selectedFoodSet.Price ?? 0);
-    newOrdered.FoodOrderedFoodSets?.push(newFoodSet as FoodOrderedFoodSetsInterface);
-    setFoodOrdered({ ...newOrdered, TotalPrice: newPrice });
+    fetch(apiUrl, requestOptions)
+      .then(response => response.json())
+      .then(res => {
+        console.log(res);
+        if (res.data) {
+          setDiabetesLevel(res.data);
+        } else {
+          console.log(res.error);
+        }
+      })
   }
-
-  const addQuantity = (index: number) => {
-    let newFoodOrderedFoodSets = foodOrdered.FoodOrderedFoodSets;
-
-    if (newFoodOrderedFoodSets === undefined) {
-      return;
+  const getObesityLevel = async () => {                       
+    const apiUrl = "http://localhost:8080/ObesityLevel";
+    const requestOptions = {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("token")}`
+      }
     }
 
-    let foodSetID = newFoodOrderedFoodSets[index].FoodSetID;
-    let newTotalPrice = (foodOrdered.TotalPrice ?? 0) + (foodSets.find(f => f.ID === foodSetID)?.Price ?? 0);
-    newFoodOrderedFoodSets[index].Quantity++;
-    setFoodOrdered({ ...foodOrdered, FoodOrderedFoodSets: newFoodOrderedFoodSets, TotalPrice: newTotalPrice });
+    fetch(apiUrl, requestOptions)
+      .then(response => response.json())
+      .then(res => {
+        console.log(res);
+        if (res.data) {
+          setObesityLevel(res.data);
+        } else {
+          console.log(res.error);
+        }
+      })
   }
+  const convertType = (data: string | number | undefined) => {
+    let val = typeof data === "string" ? parseInt(data) : data;
+    return val;
+  };
 
-  const reduceQuantity = (index: number) => {
-    let newFoodOrderedFoodSets = foodOrdered.FoodOrderedFoodSets;
+  const submit = () => {
+    let data = {
+      HistorySheetID: convertType(OutpatienScreenings.HistorySheetID),
+      EmergencyLevelID: convertType(OutpatienScreenings. EmergencyLevelID),
+      HighBloodPressureLevelID: convertType(OutpatienScreenings.HighBloodPressureLevelID),
+      DiabetesLevelID: convertType(OutpatienScreenings.DiabetesLevelID),
+      ObesityLevelID: convertType(OutpatienScreenings.ObesityLevelID),
+      //Time: selectedDate,
+      //Note: OutpatienScreenings.Note ?? "",
+    };
+    console.log(data)
 
-    if (newFoodOrderedFoodSets === undefined) {
-      return;
-    }
+    useEffect(() => {
+      getHistorySheet();
+      getEmergencyLevel();
+      getHighBloodPressureLevels();
+      getDiabetesLevel();
+      getObesityLevel();
+    }, []);
 
-    if (newFoodOrderedFoodSets[index].Quantity === 1) {
-      return;
-    }
+    const apiUrl = "http://localhost:8080/OutpatienScreenings";
+    const requestOptionsPost = {
+      
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    };
 
-    let foodSetID = newFoodOrderedFoodSets[index].FoodSetID;
-    let newTotalPrice = (foodOrdered.TotalPrice ?? 0) - (foodSets.find(f => f.ID === foodSetID)?.Price ?? 0);
-    newFoodOrderedFoodSets[index].Quantity--;
-    setFoodOrdered({ ...foodOrdered, FoodOrderedFoodSets: newFoodOrderedFoodSets, TotalPrice: newTotalPrice });
-  }
-
-  const removeFoodSetFromOrdered = (index: number) => {
-    let currentFoodOrderedFoodSets = foodOrdered.FoodOrderedFoodSets;
-
-    if (currentFoodOrderedFoodSets === undefined) {
-      return;
-    }
-
-    let foodSetID = currentFoodOrderedFoodSets[index].FoodSetID;
-    let newTotalPrice = (foodOrdered.TotalPrice ?? 0) - ((foodSets.find(f => f.ID === foodSetID)?.Price ?? 0) * currentFoodOrderedFoodSets[index].Quantity);
-    let newFoodOrderedFoodSets = currentFoodOrderedFoodSets.filter((_, i) => i !== index);
-    setFoodOrdered({ ...foodOrdered, FoodOrderedFoodSets: newFoodOrderedFoodSets, TotalPrice: newTotalPrice });
-  }
-
-  const handleSelectChange = (event: SelectChangeEvent<number>) => {
-    const name = event.target.name;
-    setFoodOrdered({...foodOrdered, [name]: event.target.value});
-  }
-
-  /* useEffect มี 2 Parameter 
-      1. () => {} เป็นการดึงฟังก์ชัน Get ที่เราต้องใช้มาใช้
-      2. [] Array ว่างเปล่าตัวนี้หมายความ มันจะเป็นการเรียกใช้ useEffect แค่ครั้งเดียว ก็คือดึงข้อมูลแต่ละตัวมาแค่ครั้งเดียว 
-      (หมายถึงดึงมาเฉพาะตอนเปิดหน้า Create)
-  */
-
-  useEffect(() => {
-    getHistorySheets();
-    getFoodSets();
-    getFoodPaymentTypes();
-    // if(foodOrdered.historySheetID == 0) return;
-    // setSelectedhistorySheet(historySheets.find(b => b.ID === foodOrdered.historySheetID))
-  }, []);
-
-  // console.log(foodOrdered);
-  console.log(selectedFoodSet);
-
-  /* ส่วนของ AutoComplete (กรุณาใส่ตัว set ตรง Option ให้ตรง)
-      Ex. const [foodSets, setFoodSets] = React.useState<FoodSetsInterface[]>([]); 
-          เวลาใส่ก็ options={foodSets}
-
-  */
+    fetch(`${apiUrl}/OutpatienScreenings`, requestOptionsPost)
+      .then((response) => response.json())
+      .then((res) => {
+        if (res.data) {
+          console.log("บันทึกได้")
+          setSuccess(true);
+          //setErrorMessage("")
+          //ClearForm();
+        } else {
+          console.log("บันทึกไม่ได้")
+          setSuccess(true);
+          //setErrorMessage("")
+        }
+  });
 
   return (
-    <Container maxWidth="md">
-      {/* <Box sx={{ bgcolor: '#cfe8fc', height: '100vh' }} />     */}
-      <Snackbar
-        open={success}
-        autoHideDuration={6000}
-        onClose={handleClose}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-      >
-        <Alert onClose={handleClose} severity="success">
-          บันทึกข้อมูลสำเร็จ
-        </Alert>
-      </Snackbar>
-      <Snackbar open={error} autoHideDuration={6000} onClose={handleClose}>
-        <Alert onClose={handleClose} severity="error">
-          บันทึกข้อมูลไม่สำเร็จ
-        </Alert>
-      </Snackbar>
-      <Paper>
-        <Box
-          display={"flex"}
-          sx={{
-            marginTop: 2,
-            marginX: 2,
-            paddingY: 2,
-          }}
-        >
-          <h2>รายการการสั่งอาหารว่าง</h2>
-        </Box>
-        <hr />
-        <Grid container spacing={2} sx={{ padding: 2 }}>
-          <Grid item xs={4}>
-            <h3>ห้องที่จอง</h3>
-          </Grid>
-          <Grid item xs={8}>
-            <TextField
-              disabled
-              id="Room"
-              value={historySheet?.Room}
-            />
-          </Grid>
-          <Grid item xs={4}>
-            <h3>รายการอาหารว่าง</h3>
-          </Grid>
-          <Grid item xs={8}>
-            <Autocomplete
-              disablePortal
-              id="combo-box-demo"
-              options={foodSets}
-              onChange={(event: any, newValue: FoodSetsInterface | null) => {
-                setSelectedFoodSet(newValue);
-              }}
-              getOptionLabel={option => option.Name}
-              sx={{ maxWidth: 300 }}
-              renderInput={(params) => <TextField {...params} label="รายการอาหารว่าง" />}
-            />
-            {/* <Select
-              inputProps={{
-                name: "FoodSetID"
-              }}
-              value={selectedFoodSet!.ID}
-              onChange={(e: SelectChangeEvent<number>) => { setSelectedFoodSet(foodSets.find(fs => fs.ID === e.target.value) as FoodSetsInterface); }}
-            >
-              {foodSets.map((foodS: FoodSetsInterface) => (
-                <MenuItem key={foodS.ID} value={foodS.ID}>{foodS.Name}</MenuItem>
-              ))}
-            </Select> */}
-            <Button
-              variant="contained"
-              onClick={addToOrder}
-            >
-              เพิ่ม
-            </Button>
-          </Grid>
-          <Grid item xs={12}>
-            <Table size="small">
-              <TableHead>
-                <TableRow>
-                  <TableCell>Food set name</TableCell>
-                  <TableCell>Quantity</TableCell>
-                  <TableCell>Set price</TableCell>
-                  <TableCell></TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {foodOrdered.FoodOrderedFoodSets?.map((item: FoodOrderedFoodSetsInterface, index: number) => (
-                  <TableRow key={index}>
-                    <TableCell>{foodSets.find(f => f.ID === item.FoodSetID)?.Name}</TableCell>
-                    <TableCell>{item.Quantity}</TableCell>
-                    <TableCell>{foodSets.find(f => f.ID === item.FoodSetID)?.Price}</TableCell>
-                    <TableCell>
-                      <Button size="small" variant="outlined" color="success" onClick={() => addQuantity(index)}>+</Button>&nbsp;
-                      <Button size="small" variant="outlined" color="error" onClick={() => reduceQuantity(index)}>-</Button>&nbsp;
-                      <Button size="small" variant="outlined" color="error" onClick={() => removeFoodSetFromOrdered(index)}>Remove</Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </Grid>
-          <Grid item xs={4}>
-            <h3>วิธีการชำระเงิน</h3>
-          </Grid>
-          <Grid item xs={5}>
-            <Autocomplete
-              disablePortal
-              id="combo-box-demo"
-              options={foodPaymenyTypes}
-              onChange={(event: any, newValue: FoodPaymentTypesInterface | null) => {
-                setFoodOrdered({ ...foodOrdered, FoodPaymentTypeID: newValue ? newValue.ID : 0 });
-              }}
-              getOptionLabel={option => option.Name}
-              sx={{ maxWidth: 300 }}
-              renderInput={(params) => <TextField {...params} label="วิธีการชำระเงิน" />}
-            />
-            {/* <Select
-              inputProps={{
-                name: "FoodPaymentTypeID"
-              }}
-              value={foodOrdered.FoodPaymentTypeID}
-              onChange={handleSelectChange}
-            >
-              {foodPaymenyTypes.map((payment: FoodPaymentTypesInterface) => (
-                <MenuItem key={payment.ID} value={payment.ID}>{payment.Name}</MenuItem>
-              ))}
-            </Select> */}
-          </Grid>
-          <Grid item xs={3}>
-            <TextField
-              disabled
-              id="Total Price"
-              label="ราคารวม"
-              value={foodOrdered.TotalPrice}
-            />
-          </Grid>
-
-          <Grid item xs={4}>
-            <h3>เวลา</h3>
-          </Grid>
-          <Grid item xs={6}>
-            <FormControl fullWidth variant="outlined">
-              <LocalizationProvider dateAdapter={AdapterDateFns}>
-                <DateTimePicker
-                  disabled
-                  value={foodOrdered.FoodTime}
-                  onChange={(newValue) => {
-                    setFoodOrdered({ ...foodOrdered, FoodTime: newValue ? newValue : new Date() });
-                  }}
-                  ampm={false}
-                  renderInput={(params) => <TextField {...params} />}
-                />
-              </LocalizationProvider>
-            </FormControl>
-          </Grid>
-          <Grid item xs={12}>
-            <Button variant="contained" sx={{ float: "right" }} onClick={submit}>บันทึกการสั่งอาหารว่าง</Button>
-          </Grid>
-        </Grid>
-        <Grid container>
-          <Grid item xs={22} >
-            <Card sx={{ maxWidth: 850 }}>
-              <CardActionArea>
-                <CardMedia
-                  component="img"
-                  height="100"
-                  image='https://images.unsplash.com/photo-1621939514649-280e2ee25f60?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2070&q=80'
-                />
-                <CardContent>
-                  <Typography gutterBottom variant="h5" component="div">
-                    Snack Box
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    ฿35 Detail: Classic Bakery and Chabaa
-                  </Typography>
-                </CardContent>
-              </CardActionArea>
-            </Card>
-          </Grid>
-          <Grid item xs={22}>
-            <Card sx={{ maxWidth: 850 }}>
-              <CardActionArea>
-                <CardMedia
-                  component="img"
-                  height="100"
-                  image='https://images.unsplash.com/photo-1598023192077-5733d6db1518?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1012&q=80'
-                />
-                <CardContent>
-                  <Typography gutterBottom variant="h5" component="div">
-                    Coffee Break
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    ฿40 Detail: Bakery, Nescafe and Coffeemate
-                  </Typography>
-                </CardContent>
-              </CardActionArea>
-            </Card>
-          </Grid>
-          <Grid item xs={22}>
-            <Card sx={{ maxWidth: 850 }}>
-              <CardActionArea>
-                <CardMedia
-                  component="img"
-                  height="100"
-                  image='https://images.unsplash.com/photo-1517433670267-08bbd4be890f?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1680&q=80'
-                />
-                <CardContent>
-                  <Typography gutterBottom variant="h5" component="div">
-                    Premium Bakery
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    ฿65 Detail: Premium Bakery, Classic Bakery and Chabaa
-                  </Typography>
-                </CardContent>
-              </CardActionArea>
-            </Card>
-          </Grid>
-        </Grid>
-      </Paper>
-    </Container>
-  )
+   //Create OutpatienScreenings Form Using MUI Autocomplete
+   
+    <div>
+      <Container maxWidth="md">
+      <h1>OutpatienScreenings</h1>
+      <form className={""} noValidate autoComplete="off"></form>
+        <div>
+          <TextField
+            id="HistorySheetID"
+            label="HistorySheetID"
+            variant="outlined"
+            value={OutpatienScreenings.HistorySheetID}
+            onChange={(e) =>
+              setOutpatienScreenings({
+                ...OutpatienScreenings,
+                //HistorySheetID: e.target.value, 
+              })
+            }
+          />
+        </div>
+        <div>
+          <TextField
+            id="EmergencyLevelID"
+            label="EmergencyLevelID"
+            variant="outlined"
+            value={OutpatienScreenings.EmergencyLevelID}
+            onChange={(e) =>
+              setOutpatienScreenings({
+                ...OutpatienScreenings,
+                //EmergencyLevelID: e.target.value,
+              })
+            }
+          />
+        </div>
+        <div>
+          <TextField
+            id="HighBloodPressureLevelID"
+            label="HighBloodPressureLevelID"
+            variant="outlined"
+            value={OutpatienScreenings.HighBloodPressureLevelID}
+            onChange={(e) =>
+              setOutpatienScreenings({
+                ...OutpatienScreenings,
+                //HighBloodPressureLevelID: e.target.value,
+              })
+            }
+          />
+        </div>
+        <div>
+          <TextField
+            id="DiabetesLevelID"
+            label="DiabetesLevelID"
+            variant="outlined"
+            value={OutpatienScreenings.DiabetesLevelID}
+            onChange={(e) =>
+              setOutpatienScreenings({
+                ...OutpatienScreenings,
+               //DiabetesLevelID: e.target.value,
+              })
+            }
+          />
+        </div>
+        <div>
+          <TextField
+            id="ObesityLevelID"
+            label="ObesityLevelID"
+            variant="outlined"
+            value={OutpatienScreenings.ObesityLevelID}
+            onChange={(e) =>
+              setOutpatienScreenings({
+                ...OutpatienScreenings,
+                //ObesityLevelID: e.target.value,
+              })
+            }
+          />
+        </div>
+        <div>
+          <TextField
+            id="Time"
+            label="Time"
+            variant="outlined"
+            value={OutpatienScreenings.Time}
+            onChange={(e) =>
+              setOutpatienScreenings({
+                ...OutpatienScreenings,
+                //Time: e.target.value,
+              })
+            }
+          />  
+        </div>
+        <div>
+          <TextField
+            id="Note"
+            label="Note"
+            variant="outlined"
+            value={OutpatienScreenings.Note}
+            onChange={(e) =>
+              setOutpatienScreenings({
+                ...OutpatienScreenings,
+                Note: e.target.value,
+              })
+            }
+          />
+        </div>
+        <div>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => submit()}
+          > 
+            Submit
+          </Button>
+        </div>
+      </Container>
+    </div>
+  );
 }
+}
+//</form>

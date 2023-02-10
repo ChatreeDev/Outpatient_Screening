@@ -7,47 +7,62 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// POST /foodordereds
-func CreateOutpatientScreening(c *gin.Context) {
+// POST /outpatientScreenings
+func CreateOutpatientScreenings(c *gin.Context) {
 
-	var OutpatientScreening entity.OutpatientScreening
-	var HistorySheet entity.HistorySheet
-	// var foodset entity.FoodSet
-	var HighBloodPressure_Level entity.HighBloodPressureLevel
+	var outpatient_screenings entity.OutpatientScreening
+	var history_sheets entity.HistorySheet
+	var emergency_levels entity.EmergencyLevel
+	var high_blood_pressure_levels entity.HighBloodPressureLevel
+	var diabetes_levels entity.DiabetesLevel
+	var obesity_levels entity.ObesityLevel
 
-	// ผลลัพธ์ที่ได้จากขั้นตอนที่ 8 จะถูก bind เข้าตัวแปร foodordered
-	if err := c.ShouldBindJSON(&OutpatientScreening); err != nil {
+	// ผลลัพธ์ที่ได้จากขั้นตอนที่ 10 จะถูก bind เข้าตัวแปร OutpatientScreening
+	if err := c.ShouldBindJSON(&outpatient_screenings); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	// 9: ค้นหา booking ด้วย id
-	if tx := entity.DB().Where("id = ?", OutpatientScreening.HistorySheetID).First(&HistorySheet); tx.RowsAffected == 0 {
+	// 11: ค้นหา HistorySheet ด้วย id
+	if tx := entity.DB().Where("id = ?", outpatient_screenings.HistorySheetID).First(&history_sheets); tx.RowsAffected == 0 {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "HistorySheet not found"})
 		return
 	}
 
-	// 10: ค้นหา foodset ด้วย id
-	for _, orderFoodSet := range OutpatientScreening.ObesityLevel.OutpatientScreenings {
-		if tx := entity.DB().Where("id = ?", orderFoodSet.DiabetesLevelID).First(&orderFoodSet); tx.RowsAffected == 0 {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "food set not found"})
-			return
-		}
-	}
-
-	// 11: ค้นหา foodpayment_type ด้วย id
-	if tx := entity.DB().Where("id = ?", OutpatientScreening.HighBloodPressureLevelID).First(&HighBloodPressure_Level); tx.RowsAffected == 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "food payment type not found"})
+	// 12: ค้นหา Emergency Level ด้วย id
+	if tx := entity.DB().Where("id = ?", outpatient_screenings.EmergencyLevelID).First(&emergency_levels); tx.RowsAffected == 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Emergency Level not found"})
 		return
 	}
-	// 12: สร้าง FoodOrdered
-	wv := entity.OutpatientScreening{
-		HistorySheet:           HistorySheet,                     // โยงความสัมพันธ์กับ Entity Booking
-		HighBloodPressureLevel: HighBloodPressure_Level,          // โยงความสัมพันธ์กับ Entity FoodPaymentType
-		ObesityLevel:           OutpatientScreening.ObesityLevel, // โยงความสัมพันธ์กับ Entity FoodSet (แต่ไม่โดยตรง เพราะเป็นคสพแบบหลาย)
+
+	// 13: ค้นหา HighBloodPressure Level ด้วย id
+	if tx := entity.DB().Where("id = ?", outpatient_screenings.HighBloodPressureLevelID).First(&high_blood_pressure_levels); tx.RowsAffected == 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "HighBlood Pressure Level type not found"})
+		return
 	}
 
-	// 13: บันทึก
+	// 14: ค้นหา Diebetes Level ด้วย id
+	if tx := entity.DB().Where("id = ?", outpatient_screenings.DiabetesLevelID).First(&diabetes_levels); tx.RowsAffected == 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Diabetes Level type not found"})
+		return
+	}
+
+	// 15: ค้นหา Obesity Level ด้วย id
+	if tx := entity.DB().Where("id = ?", outpatient_screenings.ObesityLevelID).First(&obesity_levels); tx.RowsAffected == 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Obesity Level type not found"})
+		return
+	}
+
+	// 16: สร้าง OutpatientScreening
+	wv := entity.OutpatientScreening{
+		HistorySheet:           history_sheets,             // โยงความสัมพันธ์กับ Entity HistorySheet
+		EmergencyLevel:         emergency_levels,           // โยงความสัมพันธ์กับ Entity EmergencyLevel
+		HighBloodPressureLevel: high_blood_pressure_levels, // โยงความสัมพันธ์กับ Entity HighBloodPressureLevel
+		DiabetesLevel:          diabetes_levels,            // โยงความสัมพันธ์กับ Entity DiabetesLevel
+		ObesityLevel:           obesity_levels,             // โยงความสัมพันธ์กับ Entity ObesityLevel
+	}
+
+	// 17: บันทึก
 	if err := entity.DB().Create(&wv).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -55,37 +70,38 @@ func CreateOutpatientScreening(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"data": wv})
 }
 
-// GET /foodordereds
+// GET /outpatientScreenings
 func ListOutpatientScreenings(c *gin.Context) {
-	var OutpatientScreening []entity.OutpatientScreening
+	var outpatientScreening []entity.OutpatientScreening
+	//id := c.Param("id") //เก็บค่า id ที่ส่งมาจาก path ไว้ในตัวแปร id
 
 	/*เงื่อนไขสำหรับการค้นหา โดยดึงข้อมูลจากตารางรองที่เกี่ยวข้องมา #ระวัง ชื่อ field ต้องตรงกัน
 	ซึ่งดูฟิลด์ได้จากเราสร้างไว้ให้ entity หลัก ในไฟล์ schema */
 
-	if err := entity.DB().Raw("SELECT * FROM food_ordereds").
-		Preload("HistorySheet").Preload("HighBloodPressureLevel").
-		Preload("FoodOrderedFoodSets").Preload("FoodOrderedFoodSets.FoodSet"). //preload แบบ join table
-		Find(&OutpatientScreening).Error; err != nil {
+	if err := entity.DB().Preload("HistorySheet").Preload("EmergencyLevel").Preload("HighBloodPressureLevel").Preload("DiabetesLevel").Preload("ObesityLevel").
+		Raw("SELECT * FROM outpatient_screenings").
+		Find(&outpatientScreening).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"data": OutpatientScreening})
+	c.JSON(http.StatusOK, gin.H{"data": outpatientScreening})
 
 }
 
-// GET /foodordered/:id
+// GET /outpatientScreening/:id
 func GetOutpatientScreening(c *gin.Context) {
-	var OutpatientScreening entity.OutpatientScreening //GET จะ​ get มาแค่ก้อนเดียวเลยไม่ใช้ array (เก็ทไอดีของตัวที่เคยบันทึก) [ex. เก็ทเอาไปคิดราคา(ของระบบอื่น)]
+	var outpatientScreening entity.OutpatientScreening //GET จะ​ get มาแค่ก้อนเดียวเลยไม่ใช้ array (เก็ทไอดีของตัวที่เคยบันทึก) [ex. เก็ทเอาไปคิดราคา(ของระบบอื่น)]
 
 	id := c.Param("id")
-	if err := entity.DB().Raw("SELECT * FROM food_ordereds WHERE id = ?", id).
-		Preload("HistorySheet").Preload("HighBloodPressureLevel").
-		Preload("FoodOrderedFoodSets").Preload("FoodOrderedFoodSets.FoodSet").
-		Find(&OutpatientScreening).Error; err != nil {
+	if err := entity.DB().Raw("SELECT * FROM outpatient_screenings WHERE id = ?", id).
+		Preload("HistorySheet").
+		Preload("EmergencyLevel").
+		Preload("HighBloodPressureLevel").
+		Preload("DiabetesLevels").
+		Preload("ObesityLevel").
+		Find(&outpatientScreening).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"data": OutpatientScreening})
-
+	c.JSON(http.StatusOK, gin.H{"data": outpatientScreening})
 }
-

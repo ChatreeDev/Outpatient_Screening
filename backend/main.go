@@ -24,33 +24,37 @@ func main() {
 			protected.GET("/Nurses", controller.ListNurses)
 			protected.GET("/Nurse/:id", controller.GetNurse)
 			protected.POST("/Nurses", controller.CreateNurse)
-			protected.PATCH("/Nurses", controller.UpdateNurse)
-			protected.DELETE("/Nurses/:id", controller.DeleteNurse)
 
 			// HistorySheet Routes
 			protected.GET("/HistorySheets", controller.ListHistorySheets)
 			protected.GET("/HistorySheet/:id", controller.GetHistorySheet)
+			protected.POST("/HistorySheets", controller.CreateHistorySheet)
+
+			// Emergency Routes
+			protected.GET("/emergency_levels", controller.ListEmergencyLevels)
+			protected.GET("/emergency_level/:id", controller.GetEmergencyLevel)
+			protected.POST("/emergency_levels", controller.CreateEmergencyLevel)
 
 			// DiabetesLevel Routes
 			protected.GET("/DiabetesLevels", controller.ListDiabetesLevels)
 			protected.GET("/DiabetesLevel/:id", controller.GetDiabetesLevel)
 			protected.POST("/DiabetesLevels", controller.CreateDiabetesLevel)
-			protected.PATCH("/DiabetesLevels", controller.UpdateDiabetesLevel)
-			protected.DELETE("/DiabetesLevels/:id", controller.DeleteDiabetesLevel)
 
 			// HighBloodPressureLevel Routes
 			protected.GET("/highbloodpressure_levels", controller.ListHighBloodPressureLevels)
 			protected.GET("/highbloodpressure_level/:id", controller.GetHighBloodPressureLevel)
 			protected.POST("/highbloodpressure_levels", controller.CreateHighBloodPressureLevel)
-			protected.PATCH("/highbloodpressure_levels", controller.UpdateHighBloodPressureLevel)
-			protected.DELETE("/highbloodpressure_levels/:id", controller.DeleteHighBloodPressureLevel)
+
+			// ObesityLevel Routes
+			protected.GET("/ObesityLevels", controller.ListObesityLevels)
+			protected.GET("/obesity_level/:id", controller.GetObesityLevel)
+			protected.POST("/ObesityLevels", controller.CreateObesityLevel)
 
 			// OutpatientScreening Routes
-			protected.GET("/OutpatientScreenings", controller.ListOutpatientScreenings)
-			protected.GET("/OutpatientScreening/:id", controller.GetOutpatientScreening)
-			protected.POST("/OutpatientScreenings", controller.CreateOutpatientScreening)
-			// protected.PATCH("/Nurses", controller.UpdateNurse)
-			// protected.DELETE("/Nurses/:id", controller.DeleteNurse
+			protected.GET("/outpatientScreenings", controller.ListOutpatientScreenings)
+			protected.GET("/outpatientScreening/:id", controller.GetOutpatientScreening)
+			protected.POST("/outpatientScreenings", controller.CreateOutpatientScreenings)
+
 		}
 	}
 

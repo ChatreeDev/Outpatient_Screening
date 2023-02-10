@@ -30,7 +30,7 @@ func GetHighBloodPressureLevel(c *gin.Context) {
 
 	//ใช้ Preload("Owner") หรอ?
 	id := c.Param("id")
-	if err := entity.DB().Raw("SELECT * FROM food_payment_types WHERE id = ?", id).Find(&highbloodpressure_level).Error; err != nil {
+	if err := entity.DB().Raw("SELECT * FROM high_blood_pressure_levels WHERE id = ?", id).Find(&highbloodpressure_level).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -42,7 +42,7 @@ func GetHighBloodPressureLevel(c *gin.Context) {
 func ListHighBloodPressureLevels(c *gin.Context) {
 	var highbloodpressure_level []entity.HighBloodPressureLevel
 
-	if err := entity.DB().Raw("SELECT * FROM food_payment_types").Scan(&highbloodpressure_level).Error; err != nil {
+	if err := entity.DB().Raw("SELECT * FROM high_blood_pressure_levels").Scan(&highbloodpressure_level).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -50,37 +50,7 @@ func ListHighBloodPressureLevels(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"data": highbloodpressure_level})
 }
 
-// DELETE /highbloodpressure_levels/:id
-func DeleteHighBloodPressureLevel(c *gin.Context) {
-	id := c.Param("id")
-	if tx := entity.DB().Exec("DELETE FROM food_payment_types WHERE id = ?", id); tx.RowsAffected == 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "payment not found"})
-		return
-	}
 
-	c.JSON(http.StatusOK, gin.H{"data": id})
-}
-
-// PATCH /highbloodpressure_levels
-func UpdateHighBloodPressureLevel(c *gin.Context) {
-	var highbloodpressure_level entity.HighBloodPressureLevel
-	if err := c.ShouldBindJSON(&highbloodpressure_level); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	if tx := entity.DB().Where("id = ?", highbloodpressure_level.ID).First(&highbloodpressure_level); tx.RowsAffected == 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "payment not found"})
-		return
-	}
-
-	if err := entity.DB().Save(&highbloodpressure_level).Error; err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"data": highbloodpressure_level})
-}
 
 /* Note.
 1. preload จะใช้ก็ต่อเมื่อ ตารางหลักต้องการดึงรายละเอียดต่างๆ(ข้อมูล)ของตารางรองไปใส่

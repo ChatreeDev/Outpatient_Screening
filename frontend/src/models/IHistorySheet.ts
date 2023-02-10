@@ -1,20 +1,20 @@
-import { OutpatientScreeningsInterface } from "./OutpatientScreening";
-import { NursesInterface } from "./INurse";
+import { OutpatientScreeningsInterface } from "./IOutpatientScreening";
+import { NurseInterface } from "./INurse";
 
-/* เอา Field มาจาก Backend เชค type ให้ตรงด้วย (type วิธีเขียนไม่เหมือนกันนะ)
-
-*/
-
-export interface HistorySheetsInterface {
+export interface HistorySheetInterface {
     ID: number;
-    Room: string;
+    Weight: number;
+    Height: number;
+    BMI: number;
+    Temperature: number;
+    SystolicBloodPressure: number;
+    DiastolicBloodPressure: number;
+    HeartRate: number;
+    RespiratoryRate: number;
+    OxygenSaturation: number;
+    DrugAllergy: string;
+    PatientSymptoms: string;
 
-    HistorySheetTimeStart: Date;
-    HistorySheetTimeStop: Date;
-
-    MemberID: number;
-    Member: NursesInterface;     //มันเป็น Object
-
-    FoodOrdereds: OutpatientScreeningsInterface[];  //Interface FoodOrdered มันรับเป็น Array
+    OutpatientScreenings: OutpatientScreeningsInterface[];
+    Nurse: NurseInterface[];
 }
-//historySheet

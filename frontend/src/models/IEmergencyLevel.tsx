@@ -1,9 +1,10 @@
 import { OutpatientScreeningsInterface } from "./IOutpatientScreening";
 
-export interface NurseInterface {
+export interface EmergencyLevelInterface {
     id: number;
-    firstName: string;
-    Email: string;
+    Level : string;
+    AssessmentForms : string;
+    HistoryTaking : string;
 
     OutpatientScreenings: OutpatientScreeningsInterface[];
 }

@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { Link as RouterLink } from "react-router-dom";
+import { Link as RouterLink, useParams } from "react-router-dom";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import Container from "@mui/material/Container";
@@ -12,23 +12,17 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import moment from "moment";
-import { FoodOrderedsInterface, FoodOrderedFoodSetsInterface } from "../models/OutpatientScreening";
 
+import { OutpatientScreeningsInterface } from "../models/IOutpatientScreening";
+//import { OutpatienScreeningsInterface, OutpatienScreeningsOutpatienScreeningSetsInterface} from "../models/IOutpatienScreenings";
 
+function OutpatienScreenings() {
+  // ดึง HistorySheetId มาจาก url ตอนกดสั่งอาหาร ex. "localhost:3000/OutpatienScreeningscreate/2" จะได้ HistorySheetId = 2
+  const { HistorySheetId } = useParams();
+  const [OutpatienScreenings, setOutpatienScreenings] = React.useState<OutpatientScreeningsInterface[]>([]);
 
-// const TableHead = withStyles(theme => ({
-//   root: {
-//     backgroundColor: 'primary'
-//   }
-// }))
-
-function Food() {
-  const [foodOrdereds, setFoodOrdereds] = React.useState<FoodOrderedsInterface[]>([]);
-
-  //เเก้เป็น getfood
-  //รับข้อมูลมาจาก DB
-  const getfood = async () => {
-    const apiUrl = `http://localhost:8080/foodordereds`;
+  const getOutpatienScreenings = async () => {
+    const apiUrl = `http://localhost:8080/OutpatienScreenings/HistorySheet/${HistorySheetId}`;
     const requestOptions = {
       method: "GET",
       headers: {
@@ -37,23 +31,20 @@ function Food() {
       },
     };
 
-    //การกระทำ
     fetch(apiUrl, requestOptions)
       .then((response) => response.json())
       .then((res) => {
         console.log(res.data);
         if (res.data) {
-          setFoodOrdereds(res.data);
+          setOutpatienScreenings(res.data);
         } else {
           console.log("else");
         }
       });
   };
 
-  //เพื่อให้มีการดึงข้อมูลใส่ combobox ตอนเริ่มต้นเเค่ครั้งเดียว
-  //
   useEffect(() => {
-    getfood();
+    getOutpatienScreenings();
   }, []);
 
   return (
@@ -73,7 +64,16 @@ function Food() {
           <Box>
             <Button
               component={RouterLink}
-              to="/create"
+              to="/HistorySheethistory"
+              variant="contained"
+              color="inherit"
+            >
+              กลับ
+            </Button>
+            &nbsp;
+            <Button
+              component={RouterLink}
+              to={"/OutpatienScreeningscreate/" + HistorySheetId}
               variant="contained"
               color="primary"
             >
@@ -90,29 +90,29 @@ function Food() {
                   ID
                 </TableCell>
                 <TableCell align="center" width="15%" sx={{ fontWeight: 'bold' }}>
-                  Booking
+                  HistorySheet ID
                 </TableCell>
                 <TableCell align="center" width="20%" sx={{ fontWeight: 'bold' }}>
-                  PaymentType
+                  ลำดับความเร่งด่วน
                 </TableCell>
                 <TableCell align="center" width="20%" sx={{ fontWeight: 'bold' }}>
-                  Order Price
+                  HighBloodPressure
                 </TableCell>
                 <TableCell align="center" width="20%" sx={{ fontWeight: 'bold' }}>
-                  Food Time
+                  Time
                 </TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {foodOrdereds.map((foodOrderItem: FoodOrderedsInterface) => (
+              {OutpatienScreenings.map((OutpatienScreeningsItem: OutpatientScreeningsInterface) => (
                 <React.Fragment>
-                  <TableRow key={foodOrderItem.ID}>
-                    <TableCell align="left">{foodOrderItem.ID}</TableCell>
-                    <TableCell align="left">{foodOrderItem.Booking.Room}</TableCell>
-                    <TableCell align="center">{foodOrderItem.FoodPaymentType.Name}</TableCell>
-                    <TableCell align="center">{foodOrderItem.TotalPrice}</TableCell>
+                  <TableRow key={OutpatienScreeningsItem.ID}>
+                    <TableCell align="left">{OutpatienScreeningsItem.ID}</TableCell>
+                    <TableCell align="left">{OutpatienScreeningsItem.HistorySheet.ID}</TableCell>          
+                    <TableCell align="center">{OutpatienScreeningsItem.EmergencyLevel.Level}</TableCell>
+                    <TableCell align="center">{OutpatienScreeningsItem.HighBloodPressureLevel.Level}</TableCell>
                     <TableCell align="center">
-                      {moment(foodOrderItem.FoodTime).format("DD/MM/YYYY HH:mm")}
+                      {moment(OutpatienScreeningsItem.Time).format("DD/MM/YYYY HH:mm")}
                     </TableCell>
                   </TableRow>
                   <TableRow>
@@ -120,22 +120,22 @@ function Food() {
                       <Table>
                         <TableHead>
                           <TableRow sx={{ backgroundColor: 'text.secondary' }}>
-                            <TableCell align="left">Food set name</TableCell>
+                            <TableCell align="left">OutpatienScreening set name</TableCell>
                             <TableCell align="left">Quantity</TableCell>
                             <TableCell align="left">Set price</TableCell>
                             <TableCell align="left">Total price</TableCell>
                           </TableRow>
                         </TableHead>
-                        <TableBody>
-                          {foodOrderItem.FoodOrderedFoodSets.map((item: FoodOrderedFoodSetsInterface) => (
+                        {/* <TableBody>
+                          {OutpatienScreeningsItem.OutpatienScreenings.map((item: OutpatienScreeningsInterface) => (
                             <TableRow key={item.ID}>
-                              <TableCell align="left">{item.FoodSet.Name}</TableCell>
+                              <TableCell align="left">{item.OutpatienScreeningSet.Name}</TableCell>
                               <TableCell align="left">{item.Quantity}</TableCell>
-                              <TableCell align="left">{item.FoodSet.Price}</TableCell>
-                              <TableCell align="left">{item.Quantity * item.FoodSet.Price}</TableCell>
+                              <TableCell align="left">{item.OutpatienScreeningSet.Price}</TableCell>
+                              <TableCell align="left">{item.Quantity * item.OutpatienScreeningSet.Price}</TableCell>
                             </TableRow>
                           ))}
-                        </TableBody>
+                        </TableBody> */}
                       </Table>
                     </TableCell>
                   </TableRow>
@@ -149,4 +149,4 @@ function Food() {
   );
 }
 
-export default Food;
+export default OutpatientScreeningsInterface;

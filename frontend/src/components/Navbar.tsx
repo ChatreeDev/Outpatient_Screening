@@ -14,10 +14,9 @@ import ListItem from "@mui/material/ListItem";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import HomeIcon from '@mui/icons-material/Home';
-import { UsersInterface } from '../models/INurse';
-
+import { NurseInterface } from '../models/INurse';
 export default function ButtonAppBar() {
-  const [users, setUsers] = useState<UsersInterface>();
+  const [users, setUsers] = useState<NurseInterface>();
   const [openDrawer, setOpenDrawer] = useState(false);
 
   //ฟังชั่น เปิดปิด
@@ -64,8 +63,8 @@ export default function ButtonAppBar() {
 
   const menu = [
     { name: "หน้าแรก", icon: <HomeIcon  />, path: "/" },
-    { name: "การสั่งอาหารว่าง", icon: <MonetizationOnIcon  />, path: "/create" },
-    { name: "รายการการสั่งอาหารว่าง", icon: <HistoryIcon  />, path: "/history" },
+    { name: "การคัดกรองคนไข้นอก", icon: <MonetizationOnIcon  />, path: "/create" },
+    { name: "บันทึกการคัดกรองคนไข้นอก", icon: <HistoryIcon  />, path: "/history" },
   ]
   return (
     <div style={{ flexGrow: 1 }}>
@@ -95,11 +94,11 @@ export default function ButtonAppBar() {
             </List>
           </Drawer>
           <Typography variant="h6" sx={{ flexGrow: 1 }}>
-            ระบบบันทึกการสั่งอาหารว่าง
+            ระบบการคัดกรองคนไข้นอก
           </Typography>
           <div style={{marginRight: ".5rem"}}>
             <Typography align="right" variant="subtitle2">
-              {users?.Email}
+              {users?.firstName}
             </Typography>
           </div>
           <div>
@@ -112,23 +111,4 @@ export default function ButtonAppBar() {
     </div>
   );
 }
-//<MenuItem onClick={SignOut}>Sign out</MenuItem>
-//<Menu
-// id="menu-appbar"
-// anchorEl={anchorEl}
-// anchorOrigin={{
-//   vertical: 'top',
-//   horizontal: 'right',
-// }}
-// keepMounted
-// transformOrigin={{
-//   vertical: 'top',
-//   horizontal: 'right',
-// }}
-// open={Boolean(anchorEl)}
-// onClose={handleClose}
-// >
-//</Menu>
-
-
 

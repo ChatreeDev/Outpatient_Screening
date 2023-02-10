@@ -7,7 +7,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
-	// "github.com/asaskevich/govalidator"
+	//"github.com/asaskevich/govalidator"
+	
+
 )
 
 // GET /Nurses
@@ -52,9 +54,9 @@ func CreateNurse(c *gin.Context) {
 	nurse.Password = string(bytes)
 
 	// แทรกการ validate ไว้ช่วงนี้ของ controller
-	// if _, err := govalidator.ValidateStruct(Nurse); err != nil {
-	// 	c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-	// 	return
+	// if _, err := govalidator.ValidateStruct(nurse); err != nil {
+	// c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	// return
 	// }
 
 	if err := entity.DB().Create(&nurse).Error; err != nil {
@@ -65,39 +67,49 @@ func CreateNurse(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"data": nurse})
 }
 
+
+
+
+
+
+
+
+
 // PATCH /Nurses
-func UpdateNurse(c *gin.Context) {
-	var nurse entity.Nurse
-	if err := c.ShouldBindJSON(&nurse); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
+// func UpdateNurse(c *gin.Context) {
+// 	var nurse entity.Nurse
+// 	if err := c.ShouldBindJSON(&nurse); err != nil {
+// 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+// 		return
+// 	}
 
-	if tx := entity.DB().Where("id = ?", nurse.ID).First(&nurse); tx.RowsAffected == 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Nurse not found"})
-		return
-	}
+// 	if tx := entity.DB().Where("id = ?", nurse.ID).First(&nurse); tx.RowsAffected == 0 {
+// 		c.JSON(http.StatusBadRequest, gin.H{"error": "Nurse not found"})
+// 		return
+// 	}
 
-	if err := entity.DB().Save(&nurse).Error; err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
+// 	if err := entity.DB().Save(&nurse).Error; err != nil {
+// 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+// 		return
+// 	}
 
-	c.JSON(http.StatusOK, gin.H{"data": nurse})
-}
+// 	c.JSON(http.StatusOK, gin.H{"data": nurse})
+// }
 
-// DELETE /Nurses/:id
-func DeleteNurse(c *gin.Context) {
-	id := c.Param("id")
-	if tx := entity.DB().Exec("DELETE FROM Nurses WHERE id = ?", id); tx.RowsAffected == 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Nurse not found"})
-		return
-	}
-	/*
-		if err := entity.DB().Where("id = ?", id).Delete(&entity.Nurse{}).Error; err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			return
-		}*/
+// // DELETE /Nurses/:id
+// func DeleteNurse(c *gin.Context) {
+// 	id := c.Param("id")
+// 	if tx := entity.DB().Exec("DELETE FROM Nurses WHERE id = ?", id); tx.RowsAffected == 0 {
+// 		c.JSON(http.StatusBadRequest, gin.H{"error": "Nurse not found"})
+// 		return
+// 	}
+// 	/*
+// 		if err := entity.DB().Where("id = ?", id).Delete(&entity.Nurse{}).Error; err != nil {
+// 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+// 			return
+// 		}*/
 
-	c.JSON(http.StatusOK, gin.H{"data": id})
-}
+// 	c.JSON(http.StatusOK, gin.H{"data": id})
+// }
+
+//Create

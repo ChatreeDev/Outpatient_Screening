@@ -1,11 +1,10 @@
-//import { DiabetesLevelsInterface } from "./OutpatientScreening";
+import { OutpatientScreeningsInterface } from "./IOutpatientScreening";
 
-export interface DiabetesLevelsInterface {
+export interface DiabetesLevelInterface {
     ID: number;
+    Level: string;
+    AssessmentForms: string;
+    HistoryTakingForms: string;
 
-    Name: string;
-    Detail: string;
-    Price: number;
-
-    DiabetesLevels: DiabetesLevelsInterface[];
+    OutpatientScreenings: OutpatientScreeningsInterface[];
 }
