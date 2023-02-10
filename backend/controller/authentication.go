@@ -14,7 +14,7 @@ type LoginPayload struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
 }
-
+//Nurse
 // SignUpPayload signup body
 type SignUpPayload struct {
 	Name     string `json:"name"`
