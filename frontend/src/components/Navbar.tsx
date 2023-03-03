@@ -14,9 +14,9 @@ import ListItem from "@mui/material/ListItem";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import HomeIcon from '@mui/icons-material/Home';
-import { NurseInterface } from '../models/INurse';
+import { EmployeesInterface } from '../models/IEmployee';
 export default function ButtonAppBar() {
-  const [users, setUsers] = useState<NurseInterface>();
+  const [users, setUsers] = useState<EmployeesInterface>();
   const [openDrawer, setOpenDrawer] = useState(false);
 
   //ฟังชั่น เปิดปิด

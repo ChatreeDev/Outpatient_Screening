@@ -1,8 +1,6 @@
 package entity
 
 import (
-	"time"
-
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
@@ -28,7 +26,7 @@ func SetupDatabase() {
 
 	// Migrate the schema
 	database.AutoMigrate(
-		&Nurse{},
+		&Employee{},
 		&HistorySheet{},
 		&EmergencyLevel{},
 		&HighBloodPressureLevel{},
@@ -42,41 +40,36 @@ func SetupDatabase() {
 	//Underscore ซ่อน err อยู่ เนื่องจากเราไม่ได้ใช้ (ไม่งั้นมันจะขึ้นแจ้งเตือนสีเหลือง) go ตัวแปรที่เขียนขึ้นมันต้องเอาไปใช้อะ
 	Password, _ := bcrypt.GenerateFromPassword([]byte("123456"), 14)
 
-	dob2, err := time.Parse("03 Feb 2536", "03 Feb 1993")
-	if err != nil {
-		panic(err)
-	}
-	db.Model(&Nurse{}).Create(&Nurse{
-		FirstName:            "Chatree",
-		LastName:             "Nernplab",
-		Email:                "ratchanok@gmail.com",
-		Password:             string(Password),
-		IdentificationNumber: "1234567890123",
-		BirthDay:             dob2,
-		Mobile:  "0812345678",
-		Address: "123/456",
-		Salary:  22000,
-	})
-	dob4, err := time.Parse("05 Feb 2536", "05 Feb 1993")
-	if err != nil {
-		panic(err)
-	}
-	db.Model(&Nurse{}).Create(&Nurse{
-		FirstName:            "Firstname",
-		LastName:             "Lastname",
-		Email:                "chanatip@example.com",
-		Password:             string(Password),
-		IdentificationNumber: "1234567890154",
-		BirthDay:             dob4,
-		Mobile:  "0892355678",
-		Address: "143/486",
-		Salary:  22000,
+	//Day of birth
+	//Birth1 := "03 Feb 2005"
+	// dob2, err := time.Parse("09-29-1995", "09-29-1995")
+	// if err != nil {
+	// 	panic(err)
+	// }
+	db.Model(&Employee{}).Create(&Employee{
+		FirstName: "Ratchanok",
+		LastName:  "Inthanon",
+		Email:     "ratchanok@gmail.com",
+		Password:  string(Password),
+		Salary:    22000,
 	})
 
-	var ratchanok Nurse
-	var chanatip Nurse
-	db.Raw("SELECT * FROM nurses WHERE email = ?", "ratchanok@gmail.com").Scan(&ratchanok)
-	db.Raw("SELECT * FROM nurses WHERE email = ?", "chanatip@example.com").Scan(&chanatip)
+	// dob4, err := time.Parse("09-29-1995", "09-29-1995")
+	// if err != nil {
+	// 	panic(err)
+	// }
+	db.Model(&Employee{}).Create(&Employee{
+		FirstName: "Firstname",
+		LastName:  "Lastname",
+		Email:     "chanatip@example.com",
+		Password:  string(Password),
+		Salary:    22000,
+	})
+
+	var ratchanok Employee
+	var chanatip Employee
+	db.Raw("SELECT * FROM Employees WHERE email = ?", "ratchanok@gmail.com").Scan(&ratchanok)
+	db.Raw("SELECT * FROM Employees WHERE email = ?", "chanatip@example.com").Scan(&chanatip)
 
 	// HistorySheet Data
 	HistorySheet1 := HistorySheet{
@@ -136,45 +129,39 @@ func SetupDatabase() {
 
 	// DiabetesLevel Data
 	DiabetesLevel1 := DiabetesLevel{
-		Level:             "กลุ่มเสี่ยงสูงมาก",
-		AssessmentForms:   "Diabetes risk score มากกว่า 8",
-		HistoryTakingForm: "Text Field",
+		Level:           "กลุ่มเสี่ยงสูงมาก",
+		AssessmentForms: "Diabetes risk score มากกว่า 8",
 	}
-	db.Model(&HighBloodPressureLevel{}).Create(&DiabetesLevel1)
+	db.Model(&DiabetesLevel{}).Create(&DiabetesLevel1)
 
 	DiabetesLevel2 := DiabetesLevel{
-		Level:             "กลุ่มเสี่ยงสูง",
-		AssessmentForms:   "Diabetes risk score 6-8 คะแนน",
-		HistoryTakingForm: "Text Field",
+		Level:           "กลุ่มเสี่ยงสูง",
+		AssessmentForms: "Diabetes risk score 6-8 คะแนน",
 	}
-	db.Model(&HighBloodPressureLevel{}).Create(&DiabetesLevel2)
+	db.Model(&DiabetesLevel{}).Create(&DiabetesLevel2)
 
 	DiabetesLevel3 := DiabetesLevel{
-		Level:             "กลุ่มเสี่ยงปานกลาง",
-		AssessmentForms:   "Diabetes risk score 3-5 คะแนน",
-		HistoryTakingForm: "Text Field",
+		Level:           "กลุ่มเสี่ยงปานกลาง",
+		AssessmentForms: "Diabetes risk score 3-5 คะแนน",
 	}
-	db.Model(&HighBloodPressureLevel{}).Create(&DiabetesLevel3)
+	db.Model(&DiabetesLevel{}).Create(&DiabetesLevel3)
 
 	DiabetesLevel4 := DiabetesLevel{
-		Level:             "กลุ่มปกติ",
-		AssessmentForms:   "Diabetes risk score น้อยกว่า 3 คะแนน",
-		HistoryTakingForm: "Text Field",
+		Level:           "กลุ่มปกติ",
+		AssessmentForms: "Diabetes risk score น้อยกว่า 3 คะแนน",
 	}
-	db.Model(&HighBloodPressureLevel{}).Create(&DiabetesLevel4)
+	db.Model(&DiabetesLevel{}).Create(&DiabetesLevel4)
 
 	// ObesityLevel Data
 	ObesityLevel1 := ObesityLevel{
-		Level:             "กลุ่มผิดปกติ",
-		AssessmentForms:   "BMI > 35, มีความผิดปกติมากกว่าเท่ากับ 3 ข้อจาก 5 ข้อในการซักประวัติ",
-		HistoryTakingForm: "Text Field",
+		Level:           "กลุ่มผิดปกติ",
+		AssessmentForms: "BMI > 35, มีความผิดปกติมากกว่าเท่ากับ 3 ข้อจาก 5 ข้อในการซักประวัติ",
 	}
 	db.Model(&ObesityLevel{}).Create(&ObesityLevel1)
 
 	ObesityLevel2 := ObesityLevel{
-		Level:             "กลุ่มปกติ",
-		AssessmentForms:   "BMI < 35, มีความผิดปกติน้อยกว่า 3 ข้อจาก 5 ข้อในการซักประวัติ",
-		HistoryTakingForm: "Text Field",
+		Level:           "กลุ่มปกติ",
+		AssessmentForms: "BMI < 35, มีความผิดปกติน้อยกว่า 3 ข้อจาก 5 ข้อในการซักประวัติ",
 	}
 	db.Model(&ObesityLevel{}).Create(&ObesityLevel2)
 
@@ -185,15 +172,9 @@ func SetupDatabase() {
 		HighBloodPressureLevel: HighBloodPressureLevel1,
 		DiabetesLevel:          DiabetesLevel1,
 		ObesityLevel:           ObesityLevel1,
+		Note:                   "คนไข้มีญาติที่เป็นโรคเบาหวาน",
+		// TimeStart: 			time.Now(),
+		// TimeEnd: 			time.Now(),
 	}
 	db.Model(&OutpatientScreening{}).Create(&OutpatientScreening1)
-
-	OutpatientScreening2 := OutpatientScreening{
-		HistorySheet:           HistorySheet1,
-		EmergencyLevel:         EmergencyLevel2,
-		HighBloodPressureLevel: HighBloodPressureLevel2,
-		DiabetesLevel:          DiabetesLevel2,
-		ObesityLevel:           ObesityLevel2,
-	}
-	db.Model(&OutpatientScreening{}).Create(&OutpatientScreening2)
 }

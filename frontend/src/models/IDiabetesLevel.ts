@@ -1,6 +1,6 @@
-import { OutpatientScreeningsInterface } from "./IOutpatientScreening";
+import { OutpatientScreeningsInterface } from "./IOutpatientScreenings";
 
-export interface DiabetesLevelInterface {
+export interface DiabetesLevelsInterface {
     ID: number;
     Level: string;
     AssessmentForms: string;

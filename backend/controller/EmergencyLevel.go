@@ -9,43 +9,43 @@ import (
 
 /* Get คือดึงตาม id ที่ส่งไป(ส่งไปหรือส่งมาว้ะ 5555) ส่วน list คือดึงทั้งหมด*/
 
-// POST /emergency_levels
+// POST /EmergencyLevels
 func CreateEmergencyLevel(c *gin.Context) {
-	var emergency_level entity.EmergencyLevel
-	if err := c.ShouldBindJSON(&emergency_level); err != nil {
+	var emergencyLevel entity.EmergencyLevel
+	if err := c.ShouldBindJSON(&emergencyLevel); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	if err := entity.DB().Create(&emergency_level).Error; err != nil {
+	if err := entity.DB().Create(&emergencyLevel).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"data": emergency_level})
+	c.JSON(http.StatusOK, gin.H{"data": emergencyLevel})
 }
 
-// GET /emergency_level/:id
+// GET /EmergencyLevel/:id
 func GetEmergencyLevel(c *gin.Context) {
-	var emergency_level entity.EmergencyLevel
+	var emergencyLevel entity.EmergencyLevel
 
 	//ใช้ Preload("Owner") หรอ?
 	id := c.Param("id")
-	if err := entity.DB().Raw("SELECT * FROM food_payment_types WHERE id = ?", id).Find(&emergency_level).Error; err != nil {
+	if err := entity.DB().Raw("SELECT * FROM emergency_levels WHERE id = ?", id).Find(&emergencyLevel).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"data": emergency_level})
+	c.JSON(http.StatusOK, gin.H{"data": emergencyLevel})
 }
 
-// GET /emergency_levels
+// GET /EmergencyLevel
 func ListEmergencyLevels(c *gin.Context) {
-	var emergency_level []entity.EmergencyLevel
+	var emergencyLevels []entity.EmergencyLevel
 
-	if err := entity.DB().Raw("SELECT * FROM food_payment_types").Scan(&emergency_level).Error; err != nil {
+	if err := entity.DB().Raw("SELECT * FROM emergency_levels").Scan(&emergencyLevels).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"data": emergency_level})
+	c.JSON(http.StatusOK, gin.H{"data": emergencyLevels})
 }

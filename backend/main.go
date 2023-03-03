@@ -21,9 +21,9 @@ func main() {
 		protected := api.Use(middlewares.Authorizes())
 		{
 			// Nurse Routes
-			protected.GET("/Nurses", controller.ListNurses)
-			protected.GET("/Nurse/:id", controller.GetNurse)
-			protected.POST("/Nurses", controller.CreateNurse)
+			protected.GET("/Employees", controller.ListEmployees)
+			protected.GET("Employee/:id", controller.GetEmployee)
+			protected.POST("/Employee", controller.CreateEmployee)
 
 			// HistorySheet Routes
 			protected.GET("/HistorySheets", controller.ListHistorySheets)
@@ -31,12 +31,12 @@ func main() {
 			protected.POST("/HistorySheets", controller.CreateHistorySheet)
 
 			// Emergency Routes
-			protected.GET("/emergency_levels", controller.ListEmergencyLevels)
-			protected.GET("/emergency_level/:id", controller.GetEmergencyLevel)
-			protected.POST("/emergency_levels", controller.CreateEmergencyLevel)
+			protected.GET("/EmergencyLevel", controller.ListEmergencyLevels)
+			protected.GET("/EmergencyLevel/:id", controller.GetEmergencyLevel)
+			protected.POST("/EmergencyLevels", controller.CreateEmergencyLevel)
 
 			// DiabetesLevel Routes
-			protected.GET("/DiabetesLevels", controller.ListDiabetesLevels)
+			protected.GET("/DiabetesLevel", controller.ListDiabetesLevel)
 			protected.GET("/DiabetesLevel/:id", controller.GetDiabetesLevel)
 			protected.POST("/DiabetesLevels", controller.CreateDiabetesLevel)
 
@@ -54,7 +54,8 @@ func main() {
 			protected.GET("/outpatientScreenings", controller.ListOutpatientScreenings)
 			protected.GET("/outpatientScreening/:id", controller.GetOutpatientScreening)
 			protected.POST("/outpatientScreenings", controller.CreateOutpatientScreenings)
-
+			protected.PATCH("/outpatientScreenings", controller.UpdateOutpatientScreening)
+			protected.DELETE("/outpatientScreenings/:id", controller.DeleteOutpatientScreening)
 		}
 	}
 
@@ -74,7 +75,8 @@ func CORSMiddleware() gin.HandlerFunc {
 
 		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With")
 
-		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT")
+		//c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT")
+		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT, DELETE, PATCH")
 
 		if c.Request.Method == "OPTIONS" {
 

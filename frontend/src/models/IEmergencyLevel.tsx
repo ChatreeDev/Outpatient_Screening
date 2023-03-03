@@ -1,7 +1,7 @@
-import { OutpatientScreeningsInterface } from "./IOutpatientScreening";
+import { OutpatientScreeningsInterface } from "./IOutpatientScreenings";
 
-export interface EmergencyLevelInterface {
-    id: number;
+export interface EmergencyLevelsInterface {
+    ID: number;
     Level : string;
     AssessmentForms : string;
     HistoryTaking : string;

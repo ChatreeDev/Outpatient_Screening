@@ -30,7 +30,7 @@ func GetHighBloodPressureLevel(c *gin.Context) {
 
 	//ใช้ Preload("Owner") หรอ?
 	id := c.Param("id")
-	if err := entity.DB().Raw("SELECT * FROM high_blood_pressure_levels WHERE id = ?", id).Find(&highbloodpressure_level).Error; err != nil {
+	if err := entity.DB().Raw("SELECT * FROM high_blood_pressure_levels WHERE id = ?", id).Scan(&highbloodpressure_level).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -40,17 +40,15 @@ func GetHighBloodPressureLevel(c *gin.Context) {
 
 // GET /highbloodpressure_levels
 func ListHighBloodPressureLevels(c *gin.Context) {
-	var highbloodpressure_level []entity.HighBloodPressureLevel
+	var highbloodpressure_levels []entity.HighBloodPressureLevel
 
-	if err := entity.DB().Raw("SELECT * FROM high_blood_pressure_levels").Scan(&highbloodpressure_level).Error; err != nil {
+	if err := entity.DB().Raw("SELECT * FROM high_blood_pressure_levels").Scan(&highbloodpressure_levels).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"data": highbloodpressure_level})
+	c.JSON(http.StatusOK, gin.H{"data": highbloodpressure_levels})
 }
-
-
 
 /* Note.
 1. preload จะใช้ก็ต่อเมื่อ ตารางหลักต้องการดึงรายละเอียดต่างๆ(ข้อมูล)ของตารางรองไปใส่

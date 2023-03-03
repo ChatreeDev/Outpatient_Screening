@@ -1,7 +1,7 @@
-import { OutpatientScreeningsInterface } from "./IOutpatientScreening";
-import { NurseInterface } from "./INurse";
+import { OutpatientScreeningsInterface } from "./IOutpatientScreenings";
+import { EmployeesInterface } from "./IEmployee";
 
-export interface HistorySheetInterface {
+export interface HistorySheetsInterface {
     ID: number;
     Weight: number;
     Height: number;
@@ -16,5 +16,5 @@ export interface HistorySheetInterface {
     PatientSymptoms: string;
 
     OutpatientScreenings: OutpatientScreeningsInterface[];
-    Nurse: NurseInterface[];
+    Employee: EmployeesInterface;
 }

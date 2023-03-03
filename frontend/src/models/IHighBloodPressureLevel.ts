@@ -1,4 +1,4 @@
-import { OutpatientScreeningsInterface } from "./IOutpatientScreening";
+import { OutpatientScreeningsInterface } from "./IOutpatientScreenings";
 
 export interface HighBloodPressureLevelsInterface {
     ID: number;

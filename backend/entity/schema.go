@@ -2,24 +2,21 @@ package entity
 
 import (
 	"time"
-	//"github.com/asaskevich/govalidator"
+
+	"github.com/asaskevich/govalidator"
 	"gorm.io/gorm"
 )
 
-type Nurse struct {
+type Employee struct {
 	gorm.Model
-	FirstName            string
-	LastName             string
-	Email                string `gorm:"uniqueIndex"`
-	Password             string
-	IdentificationNumber string
-	BirthDay             time.Time
-	Mobile               string
-	Address              string
-	Salary               uint16
+	FirstName string
+	LastName  string
+	Email     string `gorm:"uniqueIndex"`
+	Password  string
+	Salary    uint16
 
-	// 1 Nurse สามารถลงบันทึกได้หลาย HistorySheet
-	HistorySheets []HistorySheet `gorm:"foreignKey:NurseID"`
+	// 1 Employee สามารถลงบันทึกได้หลาย HistorySheet
+	HistorySheets []HistorySheet `gorm:"foreignKey:EmployeeID"`
 }
 
 type HistorySheet struct {
@@ -39,9 +36,9 @@ type HistorySheet struct {
 	// 1 HistorySheet สามารถมีการประเมินได้หลายครั้ง (OutpatientScreening)
 	OutpatientScreenings []OutpatientScreening `gorm:"foreignKey:HistorySheetID"`
 
-	// NurseID คือ Foreign Key ที่อ้างอิงไปยัง Nurse
-	NurseID *uint
-	Nurse   Nurse `references:"ID"`
+	// EmployeeID คือ Foreign Key ที่อ้างอิงไปยัง Employee
+	EmployeeID *uint
+	Employee   Employee `gorm:"references:ID"`
 }
 
 // EmergencyLevel
@@ -66,37 +63,54 @@ type HighBloodPressureLevel struct {
 type DiabetesLevel struct {
 	gorm.Model
 
-	Level             string
-	AssessmentForms   string
-	HistoryTakingForm string
+	Level           string
+	AssessmentForms string
 
 	OutpatientScreenings []OutpatientScreening `gorm:"foreignKey:DiabetesLevelID"`
 }
 type ObesityLevel struct {
 	gorm.Model
 
-	Level             string
-	AssessmentForms   string
-	HistoryTakingForm string
+	Level           string
+	AssessmentForms string
 
 	OutpatientScreenings []OutpatientScreening `gorm:"foreignKey:ObesityLevelID"`
 }
 
 type OutpatientScreening struct {
 	gorm.Model
+	Note      string    `valid:"required~กรุณากรอกการซักประวัติเพิ่มเติม"`
+	Date      time.Time `valid:"present~Date must be present"`
+	TimeStart time.Time `valid:"future~Start Time must be future"`
+	TimeEnd   time.Time `valid:"future~End Time must be future"`
 
 	HistorySheetID *uint
-	HistorySheet   HistorySheet `references:"ID"`
+	HistorySheet   HistorySheet `gorm:"references:ID"`
 
 	EmergencyLevelID *uint
-	EmergencyLevel   EmergencyLevel `references:"ID"`
+	EmergencyLevel   EmergencyLevel `gorm:"references:ID" valid:"-"`
 
 	HighBloodPressureLevelID *uint
-	HighBloodPressureLevel   HighBloodPressureLevel `references:"ID"`
+	HighBloodPressureLevel   HighBloodPressureLevel `gorm:"references:ID" valid:"-"`
 
 	DiabetesLevelID *uint
-	DiabetesLevel   DiabetesLevel `references:"ID"`
+	DiabetesLevel   DiabetesLevel `gorm:"references:ID" valid:"-"`
 
 	ObesityLevelID *uint
-	ObesityLevel   ObesityLevel `references:"ID"`
+	ObesityLevel   ObesityLevel `gorm:"references:ID" valid:"-"`
+}
+
+func init() {
+	govalidator.CustomTypeTagMap.Set("past", func(i interface{}, context interface{}) bool {
+		t := i.(time.Time)
+		return t.Before(time.Now())
+	})
+	govalidator.CustomTypeTagMap.Set("future", func(i interface{}, context interface{}) bool {
+		t := i.(time.Time)
+		return t.After(time.Now())
+	})
+	govalidator.CustomTypeTagMap.Set("present", func(i interface{}, context interface{}) bool {
+		t := i.(time.Time)
+		return t.After(time.Now().Add(time.Hour*-12)) && t.Before(time.Now().Add(time.Hour*12))
+	})
 }
