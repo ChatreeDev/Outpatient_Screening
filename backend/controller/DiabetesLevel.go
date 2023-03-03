@@ -35,8 +35,8 @@ func GetDiabetesLevel(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"data": diabetesLevel})
 }
 
-// GET /DiabetesLevels
-func ListDiabetesLevels(c *gin.Context) {
+// GET /DiabetesLevel
+func ListDiabetesLevel(c *gin.Context) {
 	var diabetesLevels []entity.DiabetesLevel //[] ส่งเป็นแบบลิสต์
 
 	if err := entity.DB().Raw("SELECT * FROM diabetes_levels").Scan(&diabetesLevels).Error; err != nil {
@@ -46,4 +46,3 @@ func ListDiabetesLevels(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"data": diabetesLevels})
 }
-

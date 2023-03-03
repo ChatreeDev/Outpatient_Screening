@@ -3,7 +3,10 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import SignIn from "./components/SignIn";
 import Home from "./components/Home";
 import Navbar from "./components/Navbar";
-import OutpatientScreeningCreate from "./components/OutpatientScreeningCreate";
+import { OutpatientScreeningsInterface } from "./models/IOutpatientScreenings";
+import OutpatientScreenings from "./components/OutpatienScreening";
+import OutpatientScreeningCreates from "./components/OutpatientScreeningCreate";
+//import OutpatientScreenings from "./components/OutpatienScreening";
 
 
 function App() {
@@ -12,11 +15,11 @@ function App() {
     setToken(localStorage.getItem("token"));
   }, []);
 
-  // if (!token) {
-  //   return (
-  //     <SignIn />
-  //   );
-  // }
+  if (!token) {
+    return (
+      <SignIn />
+    );
+  }
 // Create return function to get OutpatientScreeningCreate route
   return (
     <Router>
@@ -24,7 +27,9 @@ function App() {
         <Navbar />
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/outpatientscreeningcreate" element={<OutpatientScreeningCreate />} />
+          <Route path="/create" element={<OutpatientScreeningCreates />} />
+          <Route path="/create/:id" element={<OutpatientScreeningCreates />} />
+          <Route path="/history" element={<OutpatientScreenings />} />
         </Routes>
       </div>
     </Router>

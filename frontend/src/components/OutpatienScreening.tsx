@@ -1,56 +1,201 @@
 import React, { useEffect } from "react";
-import { Link as RouterLink, useParams } from "react-router-dom";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
+import IconButton from "@mui/material/IconButton";
 import Container from "@mui/material/Container";
-import Paper from "@mui/material/Paper";
 import Box from "@mui/material/Box";
-import Table from "@mui/material/Table";
-import TableBody from "@mui/material/TableBody";
-import TableCell from "@mui/material/TableCell";
-import TableContainer from "@mui/material/TableContainer";
-import TableHead from "@mui/material/TableHead";
-import TableRow from "@mui/material/TableRow";
-import moment from "moment";
+import Dialog from "@mui/material/Dialog";
+import DialogActions from "@mui/material/DialogActions";
+import DialogTitle from "@mui/material/DialogTitle";
+import DialogContent from "@mui/material/DialogContent";
+import Snackbar from "@mui/material/Snackbar";
+import MuiAlert, { AlertProps } from "@mui/material/Alert";
+import { DataGrid, GridColDef } from "@mui/x-data-grid";
+import { Link as RouterLink } from "react-router-dom";
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import { OutpatientScreeningsInterface } from "../models/IOutpatientScreenings";
 
-import { OutpatientScreeningsInterface } from "../models/IOutpatientScreening";
-//import { OutpatienScreeningsInterface, OutpatienScreeningsOutpatienScreeningSetsInterface} from "../models/IOutpatienScreenings";
+const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(props, ref) {
+  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+});
 
-function OutpatienScreenings() {
-  // ดึง HistorySheetId มาจาก url ตอนกดสั่งอาหาร ex. "localhost:3000/OutpatienScreeningscreate/2" จะได้ HistorySheetId = 2
-  const { HistorySheetId } = useParams();
-  const [OutpatienScreenings, setOutpatienScreenings] = React.useState<OutpatientScreeningsInterface[]>([]);
+function OutpatientScreenings() {
 
-  const getOutpatienScreenings = async () => {
-    const apiUrl = `http://localhost:8080/OutpatienScreenings/HistorySheet/${HistorySheetId}`;
+  const [success, setSuccess] = React.useState(false);
+  const [error, setError] = React.useState(false);
+  const [message, setMessage] = React.useState("");
+
+  const handleClose = (event?: React.SyntheticEvent | Event, reason?: string) => {
+    if (reason === "clickaway") {
+      return;
+    }
+    setSuccess(false);
+    setError(false);
+  };
+
+  // ประกาศตัวแปร users และ setUsers สำหรับเก็บค่าจาก UsersInterface
+  // setUsers เป็นตัว set ค่าจาก UsersInterface เข้าไปที่ตัวแปร users
+  const [outpatientscreenings, setOutpatientScreenings] = React.useState<OutpatientScreeningsInterface[]>([]);
+  const [open, setOpen] = React.useState<boolean[]>([]);
+
+
+  const getOutpatientScreenings = async () => {
+        const apiUrl = `http://localhost:8080/outpatientScreenings`;
+        const requestOptions = {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            "Content-Type": "application/json",
+          },
+        };
+    
+        fetch(apiUrl, requestOptions)
+          .then((response) => response.json())
+          .then((res) => {
+            console.log(res.data);
+            if (res.data) {
+                setOutpatientScreenings(res.data);
+            } else {
+              console.log("else");
+            }
+          });
+      };
+
+  const DeleteOutpatientScreening = async (id: number) => {
+    const apiUrl = `http://localhost:8080/outpatientScreenings/${id}`;
     const requestOptions = {
-      method: "GET",
+      method: "DELETE",
       headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
         "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("token")}`
       },
     };
 
     fetch(apiUrl, requestOptions)
       .then((response) => response.json())
       .then((res) => {
-        console.log(res.data);
+        console.log(res);
         if (res.data) {
-          setOutpatienScreenings(res.data);
-        } else {
-          console.log("else");
+          setSuccess(true);
+          setMessage("Delete Success");
+          console.log(res.data);
+        }
+        else {
+          setError(true);
+          setMessage("Delete Error");
+          console.log(res.error);
         }
       });
+    
+    // await getQueuingManagements();
+    window.location.reload();
+    handleCloseDialog(id);
+  }
+
+  const checkOpen = (id: number): boolean => {
+    return open[id] ? open[id] : false;
+  }
+
+  const handleOpen = (id: number) => {
+    let openArr = [...open];
+    openArr[id] = true;
+    setOpen(openArr);
   };
 
+  const handleCloseDialog = (id: number) => {
+    let openArr = [...open];
+    openArr[id] = false;
+    setOpen(openArr);
+  };
+
+  const columns: GridColDef[] = [
+    {
+      field: "Actions",
+      type: "action",
+      width: 100,
+      renderCell: (params) => {
+        return (
+          <React.Fragment>
+            <IconButton size="small" component={RouterLink} to={`/create/${params.row.ID}`}>
+              <EditIcon color="success" fontSize="small"></EditIcon>
+            </IconButton>
+            <IconButton size="small" onClick={() => handleOpen(params.row.ID)}>
+              <DeleteIcon color="error" fontSize="small"></DeleteIcon>
+            </IconButton>
+            <Dialog open={checkOpen(params.row.ID)} onClose={() => handleCloseDialog(params.row.ID)}>
+              <DialogTitle>ยืนยันลบข้อมูล</DialogTitle>
+              <DialogContent>คุณต้องการลบการคัดกรอง ({ params.row.ID }) ใช่ไหม?</DialogContent>
+              <DialogActions>
+                <Button onClick={() => handleCloseDialog(params.row.ID)}>ยกเลิก</Button>
+                <Button onClick={() => DeleteOutpatientScreening(params.row.ID)}>ตกลง</Button>
+              </DialogActions>
+            </Dialog>
+          </React.Fragment>
+        )
+      }
+    },
+
+    { field: "ID", headerName: "ID", width: 50 },
+    { field: "OutpatientScreenings.HistorySheet.ID", headerName: "Historysheet", width: 96, valueGetter: (params) => { return params.row.HistorySheetID}},
+    { field: "OutpatientScreenings.EmergencyLevel.Level", headerName: "การประเมินระดับความเร่งด่วน", width: 96, valueGetter: (params) => { return params.row.EmergencyLevel.Level}},
+    { field: "OutpatientScreenings.HighBloodPressureLevel.Level", headerName: "การประเมินระดับความดันโลหิตสูง", width: 120, valueGetter: (params) => { return params.row.HighBloodPressureLevel.Level} },
+    { field: "OutpatientScreenings.DiabetesLevel.Level", headerName: "การประเมินระดับเบาหวาน", width: 180, valueGetter: (params) => { return params.row.DiabetesLevel.Level} },
+    { field: "OutpatientScreenings.ObesityLevel.Level", headerName: "การประเมินระดับโรคอ้วน", width: 180, valueGetter: (params) => { return params.row.ObesityLevel.Level} },
+    // { field: "QueuingManagements.Note", headerName: "บันทึกเพิ่มเติม", width: 150, valueGetter: (params) => { return params.row.Note} },
+    { field: "OutpatientScreenings.TimeEnd", headerName: "เวลา", width: 180, valueGetter: (params) => { return params.row.TimeEnd}},
+
+    // { field: "ID", headerName: "ID", width: 96, },
+    // { field: "Weight", headerName: "Weight", width: 96 },
+    // { field: "Height", headerName: "Height", width: 96 },
+    // { field: "BMI", headerName: "BMI", width: 96, valueFormatter: params => (params.value.toFixed(2)) },
+    // { field: "Temperature", headerName: "Temperature", width: 96 },
+    // { field: "SystolicBloodPressure", headerName: "SystolicBloodPressure", width: 96 },
+    // { field: "DiastolicBloodPressure", headerName: "DiastolicBloodPressure", width: 96 },
+    // { field: "HeartRate", headerName: "HeartRate", width: 96 },
+    // { field: "RespiratoryRate", headerName: "RespiratoryRate", width: 96 },
+    // { field: "OxygenSaturation", headerName: "OxygenSaturation", width: 96 },
+    // { field: "DrugAllergySymtom", headerName: "DrugAllergySymtom", width: 96 },
+    // { field: "PatientSymtom", headerName: "PatientSymtom", width: 96 },
+    // { field: "PatientRegister ID", headerName: "Patient", width: 96, valueGetter: (params) => { return params.row.PatientRegister.FirstName + " " + params.row.PatientRegister.LastName } },
+    // { field: "Nurse ID", headerName: "Nurse", width: 96, valueGetter: (params) => { return params.row.Nurse.FirstName + " " + params.row.Nurse.LastName } },
+    // { field: "DrugAllergy ID", headerName: "Drug Allergy", width: 96, valueGetter: (params) => { return params.row.DrugAllergy.Name } },
+
+  ];
+
+  // เมื่อมีการ log out ฟังก์ชันนี้จะทำการ clear token ใน local storage และเปลี่ยน path ไปที่หน้า log in
+
+
   useEffect(() => {
-    getOutpatienScreenings();
+    getOutpatientScreenings();
   }, []);
 
   return (
     <div>
-      <Container sx={{ marginTop: 2 }} maxWidth="lg">
-        <Box display="flex">
+      <Container maxWidth="lg">
+        <Snackbar
+          open={success}
+          autoHideDuration={5000}
+          onClose={handleClose}
+          anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+        >
+          <Alert onClose={handleClose} severity="success">
+            {message}
+          </Alert>
+        </Snackbar>
+        <Snackbar open={error}
+          autoHideDuration={6000}
+          onClose={handleClose}>
+          <Alert onClose={handleClose} severity="error">
+            {message}
+          </Alert>
+        </Snackbar>
+        <Box
+          display="flex"
+          sx={{
+            marginTop: 2,
+          }}
+        >
           <Box flexGrow={1}>
             <Typography
               component="h2"
@@ -58,95 +203,23 @@ function OutpatienScreenings() {
               color="primary"
               gutterBottom
             >
-              รายการการสั่งอาหารว่าง
+              ข้อมูลการจัดการคิวการรักษา
             </Typography>
           </Box>
           <Box>
-            <Button
-              component={RouterLink}
-              to="/HistorySheethistory"
-              variant="contained"
-              color="inherit"
-            >
-              กลับ
-            </Button>
-            &nbsp;
-            <Button
-              component={RouterLink}
-              to={"/OutpatienScreeningscreate/" + HistorySheetId}
-              variant="contained"
-              color="primary"
-            >
-              การสั่งอาหารว่าง
-            </Button>
           </Box>
         </Box>
-
-        <TableContainer component={Paper} sx={{ marginTop: 4 }}>
-          <Table sx={{ miinWidth: 650 }} aria-label="simple table">
-            <TableHead>
-              <TableRow sx={{ backgroundColor: 'primary.main' }}>
-                <TableCell align="left" width="15%" sx={{ fontWeight: 'bold' }}>
-                  ID
-                </TableCell>
-                <TableCell align="center" width="15%" sx={{ fontWeight: 'bold' }}>
-                  HistorySheet ID
-                </TableCell>
-                <TableCell align="center" width="20%" sx={{ fontWeight: 'bold' }}>
-                  ลำดับความเร่งด่วน
-                </TableCell>
-                <TableCell align="center" width="20%" sx={{ fontWeight: 'bold' }}>
-                  HighBloodPressure
-                </TableCell>
-                <TableCell align="center" width="20%" sx={{ fontWeight: 'bold' }}>
-                  Time
-                </TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {OutpatienScreenings.map((OutpatienScreeningsItem: OutpatientScreeningsInterface) => (
-                <React.Fragment>
-                  <TableRow key={OutpatienScreeningsItem.ID}>
-                    <TableCell align="left">{OutpatienScreeningsItem.ID}</TableCell>
-                    <TableCell align="left">{OutpatienScreeningsItem.HistorySheet.ID}</TableCell>          
-                    <TableCell align="center">{OutpatienScreeningsItem.EmergencyLevel.Level}</TableCell>
-                    <TableCell align="center">{OutpatienScreeningsItem.HighBloodPressureLevel.Level}</TableCell>
-                    <TableCell align="center">
-                      {moment(OutpatienScreeningsItem.Time).format("DD/MM/YYYY HH:mm")}
-                    </TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell colSpan={4}>
-                      <Table>
-                        <TableHead>
-                          <TableRow sx={{ backgroundColor: 'text.secondary' }}>
-                            <TableCell align="left">OutpatienScreening set name</TableCell>
-                            <TableCell align="left">Quantity</TableCell>
-                            <TableCell align="left">Set price</TableCell>
-                            <TableCell align="left">Total price</TableCell>
-                          </TableRow>
-                        </TableHead>
-                        {/* <TableBody>
-                          {OutpatienScreeningsItem.OutpatienScreenings.map((item: OutpatienScreeningsInterface) => (
-                            <TableRow key={item.ID}>
-                              <TableCell align="left">{item.OutpatienScreeningSet.Name}</TableCell>
-                              <TableCell align="left">{item.Quantity}</TableCell>
-                              <TableCell align="left">{item.OutpatienScreeningSet.Price}</TableCell>
-                              <TableCell align="left">{item.Quantity * item.OutpatienScreeningSet.Price}</TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody> */}
-                      </Table>
-                    </TableCell>
-                  </TableRow>
-                </React.Fragment>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
+        <div style={{ height: 400, width: "100%", marginTop: '20px' }}>
+          <DataGrid
+            rows={outpatientscreenings}
+            getRowId={(row) => row.ID}
+            columns={columns}
+            pageSize={5}
+            rowsPerPageOptions={[5]}
+          />
+        </div>
       </Container>
     </div>
   );
 }
-
-export default OutpatientScreeningsInterface;
+export default OutpatientScreenings;

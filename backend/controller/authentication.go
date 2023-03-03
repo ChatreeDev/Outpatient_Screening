@@ -14,7 +14,8 @@ type LoginPayload struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
 }
-//Nurse
+
+// employee
 // SignUpPayload signup body
 type SignUpPayload struct {
 	Name     string `json:"name"`
@@ -31,20 +32,20 @@ type LoginResponse struct {
 // POST /login
 func Login(c *gin.Context) {
 	var payload LoginPayload
-	var nurse entity.Nurse
+	var employee entity.Employee
 
 	if err := c.ShouldBindJSON(&payload); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	// ค้นหา nurse ด้วย email ที่ผู้ใช้กรอกเข้ามา
-	if err := entity.DB().Raw("SELECT * FROM nurses WHERE email = ?", payload.Email).Scan(&nurse).Error; err != nil {
+	// ค้นหา employee ด้วย email ที่ผู้ใช้กรอกเข้ามา
+	if err := entity.DB().Raw("SELECT * FROM employees WHERE email = ?", payload.Email).Scan(&employee).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	// ตรวจสอบรหัสผ่าน
-	err := bcrypt.CompareHashAndPassword([]byte(nurse.Password), []byte(payload.Password))
+	err := bcrypt.CompareHashAndPassword([]byte(employee.Password), []byte(payload.Password))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "password is incerrect"})
 		return
@@ -61,7 +62,7 @@ func Login(c *gin.Context) {
 		ExpirationHours: 24,
 	}
 
-	signedToken, err := jwtWrapper.GenerateToken(nurse.Email)
+	signedToken, err := jwtWrapper.GenerateToken(employee.Email)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "error signing token"})
 		return
@@ -69,16 +70,16 @@ func Login(c *gin.Context) {
 
 	tokenResponse := LoginResponse{
 		Token: signedToken,
-		ID:    nurse.ID,
+		ID:    employee.ID,
 	}
 
 	c.JSON(http.StatusOK, gin.H{"data": tokenResponse})
 }
 
 // POST /create
-func Createnurse(c *gin.Context) {
+func Createemployee(c *gin.Context) {
 	var payload SignUpPayload
-	var nurse entity.Nurse
+	var employee entity.Employee
 
 	if err := c.ShouldBindJSON(&payload); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -92,14 +93,14 @@ func Createnurse(c *gin.Context) {
 		return
 	}
 
-	nurse.FirstName = payload.Name
-	//nurse.Email = payload.Email
-	nurse.Password = string(hashPassword)
+	employee.FirstName = payload.Name
+	//employee.Email = payload.Email
+	employee.Password = string(hashPassword)
 
-	if err := entity.DB().Create(&nurse).Error; err != nil {
+	if err := entity.DB().Create(&employee).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{"data": nurse})
+	c.JSON(http.StatusCreated, gin.H{"data": employee})
 }
